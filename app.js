@@ -1,31 +1,32 @@
 const express = require('express');
+
 const app = express();
 const {
-  PORT = 3000
+  PORT = 3000,
 } = process.env;
 const mongoose = require('mongoose');
-const userRouter = require('./routes/users');
-const movieRouter = require('./routes/movies');
-const auth = require('./middlewares/auth');
 const bodyParser = require('body-parser');
 const {
   celebrate,
   Joi,
-  errors
+  errors,
 } = require('celebrate');
+const userRouter = require('./routes/users');
+const movieRouter = require('./routes/movies');
+const auth = require('./middlewares/auth');
 const {
   login,
-  createUser
+  createUser,
 } = require('./controllers/users');
 const {
   requestLogger,
-  errorLogger
+  errorLogger,
 } = require('./middlewares/logger');
 
 mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
   useNewUrlParser: true,
   useCreateIndex: true,
-  useFindAndModify: false
+  useFindAndModify: false,
 });
 app.use(bodyParser.json());
 
@@ -52,11 +53,14 @@ app.post(
   }),
   createUser,
 );
-app.use(auth)
+app.use(auth);
 app.use('/', userRouter);
 app.use('/', movieRouter);
 app.use(errorLogger);
-
+app.use(errors());
+app.use((err, req, res, next) => {
+  res.status(err.statusCode).send({ message: err.message });
+});
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`)
-})
+  console.log(`App listening on port ${PORT}`);
+});
