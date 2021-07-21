@@ -15,6 +15,7 @@ const userRouter = require('./routes/users');
 const movieRouter = require('./routes/movies');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
+const invalidRoutes = require('./middlewares/invalidRoutes');
 const {
   login,
   createUser,
@@ -57,6 +58,7 @@ app.post(
 app.use(auth);
 app.use('/', userRouter);
 app.use('/', movieRouter);
+app.use(invalidRoutes);
 app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
