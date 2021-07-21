@@ -52,16 +52,25 @@ const createMovie = (req, res, next) => {
 };
 
 const deleteMovie = (req, res, next) => {
-  Movie.findByIdAndRemove(req.params.movieId)
-    .then((res) => console.log(res))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new ValidationError('Переданы некорректные данные');
-      } else {
-        throw new DefaultError(`Произошла ошибка: ${err}`);
+  let dealeatable = false;
+  Movie.findById(req.params.movieId)
+    .then((movie) => {
+      if (movie.owner === req.user._id) {
+        dealeatable = true;
       }
-    })
-    .catch(next);
+    });
+  if (dealeatable) {
+    Movie.findByIdAndRemove(req.params.movieId)
+      .then((res) => console.log(res))
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          throw new ValidationError('Переданы некорректные данные');
+        } else {
+          throw new DefaultError(`Произошла ошибка: ${err}`);
+        }
+      })
+      .catch(next);
+  }
 };
 
 module.exports = {

@@ -14,6 +14,7 @@ const {
 const userRouter = require('./routes/users');
 const movieRouter = require('./routes/movies');
 const auth = require('./middlewares/auth');
+const errorHandler = require('./middlewares/errorHandler');
 const {
   login,
   createUser,
@@ -58,9 +59,7 @@ app.use('/', userRouter);
 app.use('/', movieRouter);
 app.use(errorLogger);
 app.use(errors());
-app.use((err, req, res, next) => {
-  res.status(err.statusCode).send({ message: err.message });
-});
+app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
