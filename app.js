@@ -1,8 +1,10 @@
 const express = require('express');
+const helmet = require('helmet');
 
 const app = express();
 const {
   PORT = 3000,
+  MONGOLINK = 'mongodb://localhost:27017/bitfilmsdb',
 } = process.env;
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -11,11 +13,11 @@ const {
   Joi,
   errors,
 } = require('celebrate');
-const userRouter = require('./routes/users');
-const movieRouter = require('./routes/movies');
+const router = require('./routes/index');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 const invalidRoutes = require('./middlewares/invalidRoutes');
+const { limiter } = require('./middlewares/rateLimiter');
 const {
   login,
   createUser,
@@ -25,11 +27,13 @@ const {
   errorLogger,
 } = require('./middlewares/logger');
 
-mongoose.connect('mongodb://localhost:27017/bitfilmsdb', {
+mongoose.connect(MONGOLINK, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
 });
+app.use(limiter);
+app.use(helmet());
 app.use(bodyParser.json());
 
 app.use(requestLogger);
@@ -56,8 +60,7 @@ app.post(
   createUser,
 );
 app.use(auth);
-app.use('/', userRouter);
-app.use('/', movieRouter);
+app.use('/', router);
 app.use(invalidRoutes);
 app.use(errorLogger);
 app.use(errors());

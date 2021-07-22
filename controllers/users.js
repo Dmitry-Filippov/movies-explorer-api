@@ -38,6 +38,9 @@ const patchCurrentUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, {
     name,
     email,
+  }, {
+    runValidators: true,
+    new: true,
   })
     .then((user) => res.send(user))
     .catch((err) => {
@@ -46,7 +49,7 @@ const patchCurrentUser = (req, res, next) => {
       } else if (err.name === 'CastError') {
         throw new NotFoundError('Запрашиваемый пользователь не найден');
       } else {
-        throw new DefaultError(`Произошла ошибка: ${err}`);
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
@@ -102,7 +105,7 @@ const createUser = (req, res, next) => {
         } else if (err.name === 'MongoError' && err.code === 11000) {
           throw new UniqueError('Пользователь с таким email уже существует');
         } else {
-          throw new DefaultError(`Произошла ошибка: ${err}`);
+          throw new DefaultError('Произошла ошибка');
         }
       })
       .catch(next);

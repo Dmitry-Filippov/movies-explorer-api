@@ -1,4 +1,5 @@
+const NotFoundError = require('../errrors/not-found-err');
+
 module.exports = (req, res, next) => {
-  res.status(404).send({ message: 'Ошибка роутизации' });
-  next();
+  next(new NotFoundError('Ошибка роутизации'));
 };

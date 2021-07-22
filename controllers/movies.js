@@ -2,14 +2,13 @@ const Movie = require('../models/movie');
 const NotFoundError = require('../errrors/not-found-err');
 const DefaultError = require('../errrors/default-err');
 const ValidationError = require('../errrors/valid-err');
-const UniqueError = require('../errrors/unique-err');
-const AuthError = require('../errrors/auth-err');
+const ForbiddenError = require('../errrors/forbidden-err');
 
 const getMovies = (req, res, next) => {
   Movie.find({})
     .then((movies) => res.send(movies))
     .catch((err) => {
-      throw new DefaultError(`Произошла ошибка: ${err}`);
+      throw new DefaultError('Произошла ошибка');
     })
     .catch(next);
 };
@@ -28,6 +27,7 @@ const createMovie = (req, res, next) => {
     thumbnail,
     movieId,
   } = req.body;
+  const owner = req.user._id;
   Movie.create({
     country,
     director,
@@ -40,37 +40,52 @@ const createMovie = (req, res, next) => {
     nameEN,
     thumbnail,
     movieId,
+    owner,
   }).then((movieItem) => res.send(movieItem))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new ValidationError('Переданы некорректные данные');
       } else {
-        throw new DefaultError(`Произошла ошибка: ${err}`);
+        throw new DefaultError('Произошла ошибка');
       }
     })
     .catch(next);
 };
 
 const deleteMovie = (req, res, next) => {
-  let dealeatable = false;
   Movie.findById(req.params.movieId)
     .then((movie) => {
-      if (movie.owner === req.user._id) {
-        dealeatable = true;
+      if (movie && movie.owner.toString() === req.user._id) {
+        Movie.findByIdAndRemove(req.params.movieId)
+          .then((movie) => {
+            res.send(movie);
+          })
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              throw new ValidationError('Переданы некорректные данные');
+            } else if (err.name === 'NotFoundError') {
+              throw new NotFoundError('Фильма с таким id не существует');
+            } else {
+              throw new DefaultError('Произошла ошибка');
+            }
+          })
+          .catch(next);
+      } else if (!movie) {
+        throw new NotFoundError('Фильма с таким id не существует');
+      } else if (movie.owner.toString() !== req.user._id) {
+        throw new ForbiddenError('Не хватает прав для удаления карточки');
       }
-    });
-  if (dealeatable) {
-    Movie.findByIdAndRemove(req.params.movieId)
-      .then((res) => console.log(res))
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          throw new ValidationError('Переданы некорректные данные');
-        } else {
-          throw new DefaultError(`Произошла ошибка: ${err}`);
-        }
-      })
-      .catch(next);
-  }
+    })
+    .catch((err) => {
+      if (err.name === 'NotFoundError') {
+        throw new NotFoundError('Фильма с таким id не существует');
+      } else if (err.name === 'ForbiddenError') {
+        throw new ForbiddenError('Не хватает прав для удаления карточки');
+      } else {
+        throw new DefaultError('Произошла ошибка');
+      }
+    })
+    .catch(next);
 };
 
 module.exports = {
