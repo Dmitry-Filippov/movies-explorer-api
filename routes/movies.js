@@ -22,7 +22,7 @@ movieRouter.post('/movies', celebrate({
     trailer: Joi.string().required().pattern(/^(ftp|http|https):\/\/[^ "]+$/),
     thumbnail: Joi.string().required().pattern(/^(ftp|http|https):\/\/[^ "]+$/),
     owner: Joi.string().length(24).hex(),
-    movieId: Joi.string().length(24).hex(),
+    movieId: Joi.string().required().min(1),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
   }),

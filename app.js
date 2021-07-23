@@ -32,11 +32,11 @@ mongoose.connect(MONGOLINK, {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+app.use(requestLogger);
 app.use(limiter);
 app.use(helmet());
 app.use(bodyParser.json());
 
-app.use(requestLogger);
 app.post(
   '/signin',
   celebrate({
