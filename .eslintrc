@@ -1,0 +1,14 @@
+{
+  "extends": "airbnb-base",
+  "rules": {
+    "no-underscore-dangle": "off",
+    "no-console": "off",
+    "eqeqeq": "off",
+    "no-shadow": "off",
+    "func-names": "off",
+    "consistent-return": "off",
+    "no-unused-vars": "off"
+  }
+}
+
+/*eslint no-underscore-dangle: ["error", { "allow": ["_id"] }]*/
