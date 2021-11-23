@@ -1,5 +1,6 @@
 const express = require('express');
 const helmet = require('helmet');
+const cors = require('cors');
 
 const app = express();
 const {
@@ -32,6 +33,7 @@ mongoose.connect(MONGOLINK, {
   useCreateIndex: true,
   useFindAndModify: false,
 });
+app.use(cors());
 app.use(requestLogger);
 app.use(limiter);
 app.use(helmet());
