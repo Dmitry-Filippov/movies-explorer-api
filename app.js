@@ -4,7 +4,7 @@ const cors = require('cors');
 
 const app = express();
 const {
-  PORT = 3000,
+  PORT = 4000,
   MONGOLINK = 'mongodb://localhost:27017/bitfilmsdb',
 } = process.env;
 const mongoose = require('mongoose');
